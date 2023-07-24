@@ -16,29 +16,40 @@ app.config['SECRET_KEY'] = 'super-secret-key'
 
 firebase = pyrebase.initialize_app(config)
 auth = firebase.auth()
-@app.route('/', methods=['GET', 'POST'])
-def signin():
-    return render_template("signin.html")
+error = ""
 
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        return render_template("signup.html")
         email = request.form["email"]
         password = request.form["password"]
         try:
             login_session['user'] = auth.create_user_with_email_and_password(email, password)
-            return redirect(url_for('signin'))
+            return redirect(url_for('add_tweet'))
         except:
-            return('epic fail')
-
+            error = "auth failed :(c"
+            return render_template('signup.html')
+    return render_template("signup.html")
+@app.route('/', methods=['GET', 'POST'])
+def signin():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        try:
+            login_session['user'] = auth.sign_in_with_email_and_password(email, password)
+            return redirect(url_for('add_tweet'))
+        except:
+            error = 'sign in failed'
+    return render_template("signin.html")
 
 @app.route('/add_tweet', methods=['GET', 'POST'])
 def add_tweet():
     return render_template("add_tweet.html")
 
-
+#If the method is 'POST' take the inputs and signin the user with email & password.
+#Don't forget to store the user in the login session and to use try and except.
+#Redirect the route to the add tweet page
 
 
 if __name__ == '__main__':
